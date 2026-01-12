@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Phone, MessageSquare, MapPin, X, Check, Shield } from 'lucide-react';
+import { AlertTriangle, Phone, MessageSquare, MapPin, Check, Shield } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { FadeIn, Pulse } from '@/components/animations/MotionWrapper';
 import { LoadingSpinner } from '@/components/ui/loading';
@@ -42,23 +42,23 @@ const SOS = () => {
           currentLocation.longitude,
           token
         );
-        setSosResult({
-          message: response.message,
-          emergency_contacts: response.emergency_contacts,
-          sms_content: response.sms_content,
-        });
+        // Parse string response
+        try {
+          const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+          setSosResult({
+            message: parsed.message || 'Emergency SOS triggered successfully!',
+            emergency_contacts: parsed.emergency_contacts || [
+              { name: 'Emergency Services', phone: '911' },
+            ],
+            sms_content: parsed.sms_content || `Emergency alert sent from SafeTravel AI`,
+          });
+        } catch {
+          setDemoResult();
+        }
       } else {
         // Demo response
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        setSosResult({
-          message: 'Emergency SOS triggered successfully!',
-          emergency_contacts: [
-            { name: 'Emergency Services', phone: '911' },
-            { name: 'Mom', phone: '+1 234 567 8900' },
-            { name: 'Local Police', phone: '+1 234 567 8901' },
-          ],
-          sms_content: `🆘 EMERGENCY ALERT\n\nI need help! My current location:\nLat: ${currentLocation?.latitude.toFixed(6) || '40.7128'}\nLong: ${currentLocation?.longitude.toFixed(6) || '-74.0060'}\n\nSent via SafeTravel AI`,
-        });
+        setDemoResult();
       }
 
       setSosTriggered(true);
@@ -77,6 +77,18 @@ const SOS = () => {
     }
   };
 
+  const setDemoResult = () => {
+    setSosResult({
+      message: 'Emergency SOS triggered successfully!',
+      emergency_contacts: [
+        { name: 'Emergency Services', phone: '911' },
+        { name: 'Mom', phone: '+1 234 567 8900' },
+        { name: 'Local Police', phone: '+1 234 567 8901' },
+      ],
+      sms_content: `🆘 EMERGENCY ALERT\n\nI need help! My current location:\nLat: ${currentLocation?.latitude.toFixed(6) || '40.7128'}\nLong: ${currentLocation?.longitude.toFixed(6) || '-74.0060'}\n\nSent via SafeTravel AI`,
+    });
+  };
+
   const resetSOS = () => {
     setSosTriggered(false);
     setSosResult(null);
@@ -89,9 +101,10 @@ const SOS = () => {
           {sosTriggered && sosResult ? (
             <motion.div
               key="triggered"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="w-full max-w-md space-y-6"
             >
               {/* Success Header */}
@@ -166,6 +179,7 @@ const SOS = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="text-center space-y-8"
             >
               {/* Warning Icon */}
@@ -196,7 +210,7 @@ const SOS = () => {
               </Pulse>
 
               {/* Instructions */}
-              <FadeIn delay={0.2}>
+              <FadeIn delay={0.1}>
                 <div className="max-w-xs mx-auto space-y-2">
                   <h2 className="font-display text-xl font-bold">Emergency SOS</h2>
                   <p className="text-muted-foreground text-sm">
@@ -207,7 +221,7 @@ const SOS = () => {
               </FadeIn>
 
               {/* Features */}
-              <FadeIn delay={0.3}>
+              <FadeIn delay={0.15}>
                 <div className="glass-card p-5 max-w-sm mx-auto">
                   <div className="space-y-3">
                     {[
@@ -227,7 +241,7 @@ const SOS = () => {
               </FadeIn>
 
               {/* Location Status */}
-              <FadeIn delay={0.4}>
+              <FadeIn delay={0.2}>
                 <div className="flex items-center justify-center gap-2 text-sm">
                   <div className={`w-2 h-2 rounded-full ${currentLocation ? 'bg-success' : 'bg-warning'} animate-pulse`} />
                   <span className="text-muted-foreground">

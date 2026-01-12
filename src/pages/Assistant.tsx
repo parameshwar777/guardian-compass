@@ -58,7 +58,9 @@ const Assistant = () => {
     try {
       if (token) {
         const response = await assistantApi.chat(userMessage.content, token);
-        addAssistantMessage(response.response);
+        // Handle string response
+        const responseText = typeof response === 'string' ? response : JSON.stringify(response);
+        addAssistantMessage(responseText);
       } else {
         // Demo response
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -188,9 +190,10 @@ const Assistant = () => {
             {messages.map((message) => (
               <motion.div
                 key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.role === 'assistant' && (
@@ -224,8 +227,8 @@ const Assistant = () => {
           {/* Loading indicator */}
           {isLoading && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="flex gap-3"
             >
               <div className="w-8 h-8 rounded-xl gradient-success flex items-center justify-center">
