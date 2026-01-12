@@ -71,7 +71,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2">
-                      <p className="font-medium">{user?.name || 'User'}</p>
+                      <p className="font-medium">{user?.email?.split('@')[0] || 'User'}</p>
                       <p className="text-sm text-muted-foreground">{user?.email}</p>
                     </div>
                     <DropdownMenuSeparator />
@@ -115,7 +115,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         <User className="w-5 h-5 text-muted-foreground" />
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-sm">{user?.name || 'User'}</p>
+                        <p className="font-medium text-sm">{user?.email?.split('@')[0] || 'User'}</p>
                         <p className="text-xs text-muted-foreground">{user?.email}</p>
                       </div>
                     </motion.button>

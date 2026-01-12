@@ -14,6 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const loginWithToken = useAuthStore((state) => state.loginWithToken);
   const login = useAuthStore((state) => state.login);
   const { toast } = useToast();
 
@@ -23,7 +24,7 @@ const Login = () => {
 
     try {
       const response = await authApi.login(email, password);
-      login(response.user, response.token);
+      loginWithToken(response.access_token, email);
       toast({
         title: 'Welcome back!',
         description: 'You have successfully logged in.',
@@ -43,7 +44,7 @@ const Login = () => {
   // Demo login for testing
   const handleDemoLogin = () => {
     login(
-      { id: 'demo-user', email: 'demo@safetravel.ai', name: 'Demo User' },
+      { id: 0, email: 'demo@safetravel.ai', is_active: true },
       'demo-token-123'
     );
     navigate('/dashboard');

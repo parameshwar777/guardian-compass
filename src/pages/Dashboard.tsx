@@ -113,7 +113,7 @@ const Dashboard = () => {
         <FadeIn>
           <div className="space-y-2">
             <h1 className="font-display text-2xl lg:text-3xl font-bold">
-              {greeting()}, {user?.name?.split(' ')[0] || 'Traveler'} 👋
+              {greeting()}, {user?.email?.split('@')[0] || 'Traveler'} 👋
             </h1>
             <p className="text-muted-foreground">
               Your safety is our priority. What would you like to do today?
