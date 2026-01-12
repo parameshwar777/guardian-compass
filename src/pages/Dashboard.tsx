@@ -17,6 +17,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { FadeIn, StaggerContainer, StaggerItem, Float } from '@/components/animations/MotionWrapper';
 import { useAuthStore, useLocationStore } from '@/store/useStore';
 import { useToast } from '@/hooks/use-toast';
+import GoogleMapWrapper from '@/components/maps/GoogleMap';
 
 const featureCards = [
   {
@@ -121,6 +122,22 @@ const Dashboard = () => {
           </div>
         </FadeIn>
 
+        {/* Map Section */}
+        <FadeIn delay={0.05}>
+          <div className="glass-card overflow-hidden p-0">
+            <GoogleMapWrapper
+              center={
+                currentLocation
+                  ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+                  : { lat: 40.7128, lng: -74.006 }
+              }
+              showCurrentLocation={!!currentLocation}
+              height="200px"
+              zoom={14}
+            />
+          </div>
+        </FadeIn>
+
         {/* Location Status Card */}
         <FadeIn delay={0.1}>
           <motion.div
@@ -176,13 +193,13 @@ const Dashboard = () => {
         </FadeIn>
 
         {/* Feature Cards */}
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4" staggerDelay={0.1}>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4" staggerDelay={0.08}>
           {featureCards.map((card) => (
             <StaggerItem key={card.path}>
               <Link to={card.path}>
                 <motion.div
                   className="feature-card relative overflow-hidden"
-                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className={`absolute top-0 right-0 w-24 h-24 ${card.gradient} opacity-10 rounded-full blur-2xl`} />
@@ -206,7 +223,7 @@ const Dashboard = () => {
         </StaggerContainer>
 
         {/* Safety Stats */}
-        <FadeIn delay={0.3}>
+        <FadeIn delay={0.2}>
           <div className="glass-card p-5">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="w-5 h-5 text-success" />
@@ -231,7 +248,7 @@ const Dashboard = () => {
         </FadeIn>
 
         {/* Recent Activity */}
-        <FadeIn delay={0.35}>
+        <FadeIn delay={0.25}>
           <div className="glass-card p-5">
             <div className="flex items-center gap-3 mb-4">
               <Clock className="w-5 h-5 text-primary" />
@@ -259,7 +276,7 @@ const Dashboard = () => {
         </FadeIn>
 
         {/* Emergency SOS Card (Desktop only) */}
-        <FadeIn delay={0.4} className="hidden lg:block">
+        <FadeIn delay={0.3} className="hidden lg:block">
           <Link to="/sos">
             <motion.div
               className="glass-card p-6 border-destructive/20 relative overflow-hidden group"
@@ -271,7 +288,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-4">
                   <motion.div
                     className="w-14 h-14 rounded-xl gradient-sos flex items-center justify-center"
-                    animate={{ scale: [1, 1.05, 1] }}
+                    animate={{ scale: [1, 1.02, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
                     <AlertTriangle className="w-7 h-7 text-destructive-foreground" />

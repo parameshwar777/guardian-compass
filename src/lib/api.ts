@@ -4,10 +4,11 @@ interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  params?: Record<string, string | number>;
 }
 
 async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-  const { method = 'GET', body, token } = options;
+  const { method = 'GET', body, token, params } = options;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -17,7 +18,17 @@ async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  let url = `${API_BASE_URL}${endpoint}`;
+  
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.append(key, String(value));
+    });
+    url += `?${searchParams.toString()}`;
+  }
+
+  const response = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -48,61 +59,47 @@ export const authApi = {
 
 // Location APIs
 export const locationApi = {
-  saveLocation: (latitude: number, longitude: number, token: string) =>
-    apiCall<{ id: string; latitude: number; longitude: number; timestamp: string }>('/locations/', {
-      method: 'POST',
-      body: { latitude, longitude },
-      token,
-    }),
+  saveLocation: (latitude: number, longitude: number, accuracy: number, token: string) =>
+    apiCall<{ id: number; latitude: number; longitude: number; accuracy: number; created_at: string }>(
+      '/api/v1/locations/',
+      {
+        method: 'POST',
+        body: { latitude, longitude, accuracy },
+        token,
+      }
+    ),
 
-  getHistory: (token: string) =>
-    apiCall<{ locations: Array<{ id: string; latitude: number; longitude: number; timestamp: string; address?: string }> }>(
-      '/locations/history',
-      { token }
+  getHistory: (token: string, limit: number = 50) =>
+    apiCall<Array<{ id: number; latitude: number; longitude: number; accuracy: number; created_at: string }>>(
+      '/api/v1/locations/history',
+      { token, params: { limit } }
     ),
 };
 
 // Prediction API
 export const predictionApi = {
-  predictNextLocation: (latitude: number, longitude: number, token: string) =>
-    apiCall<{ predicted_latitude: number; predicted_longitude: number; confidence: number }>(
-      '/prediction/next-location',
-      {
-        method: 'POST',
-        body: { current_latitude: latitude, current_longitude: longitude },
-        token,
-      }
-    ),
+  predictNextLocation: (token: string) =>
+    apiCall<string>('/api/v1/prediction/next-location', {
+      method: 'POST',
+      token,
+    }),
 };
 
 // Assistant API
 export const assistantApi = {
-  chat: (message: string, token: string) =>
-    apiCall<{ response: string; suggestions?: string[] }>('/assistant/chat', {
+  chat: (question: string, token: string) =>
+    apiCall<string>('/api/v1/assistant/chat', {
       method: 'POST',
-      body: { message },
       token,
+      params: { question },
     }),
 };
 
 // Recommendations API
 export const recommendationsApi = {
-  getAccommodations: (latitude: number, longitude: number, token: string) =>
-    apiCall<{
-      recommendations: Array<{
-        id: string;
-        name: string;
-        type: string;
-        price_range: string;
-        rating: number;
-        safety_score: number;
-        safety_notes: string;
-        image_url?: string;
-        distance: string;
-      }>;
-    }>('/recommendations/accommodation', {
+  getAccommodations: (token: string) =>
+    apiCall<string>('/api/v1/recommendations/accommodation', {
       method: 'POST',
-      body: { latitude, longitude },
       token,
     }),
 };
@@ -110,14 +107,43 @@ export const recommendationsApi = {
 // SOS API
 export const sosApi = {
   trigger: (latitude: number, longitude: number, token: string) =>
-    apiCall<{
-      success: boolean;
-      message: string;
-      emergency_contacts: Array<{ name: string; phone: string }>;
-      sms_content: string;
-    }>('/sos/trigger', {
+    apiCall<string>('/api/v1/sos/trigger', {
       method: 'POST',
       body: { latitude, longitude },
+      token,
+    }),
+};
+
+// Federated Learning API
+export const federatedApi = {
+  trainLocal: (token: string) =>
+    apiCall<string>('/api/v1/federated/train-local', {
+      method: 'POST',
+      token,
+    }),
+
+  aggregate: (token: string) =>
+    apiCall<string>('/api/v1/federated/aggregate', {
+      method: 'POST',
+      token,
+    }),
+};
+
+// Users API
+export const usersApi = {
+  updateEmergencyContacts: (
+    contacts: {
+      contact1?: string;
+      contact2?: string;
+      contact3?: string;
+      contact4?: string;
+      contact5?: string;
+    },
+    token: string
+  ) =>
+    apiCall<string>('/api/v1/users/emergency-contacts', {
+      method: 'POST',
+      body: contacts,
       token,
     }),
 };

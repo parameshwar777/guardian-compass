@@ -7,13 +7,14 @@ import { LoadingSpinner, SkeletonList } from '@/components/ui/loading';
 import { useLocationStore, useAuthStore } from '@/store/useStore';
 import { locationApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import GoogleMapWrapper from '@/components/maps/GoogleMap';
 
 interface LocationHistoryItem {
-  id: string;
+  id: number;
   latitude: number;
   longitude: number;
-  timestamp: string;
-  address?: string;
+  accuracy: number;
+  created_at: string;
 }
 
 const Location = () => {
@@ -32,8 +33,13 @@ const Location = () => {
     
     setIsLoading(true);
     try {
-      const response = await locationApi.getHistory(token);
-      setLocationHistory(response.locations);
+      const response = await locationApi.getHistory(token, 50);
+      setLocationHistory(response.map((loc) => ({
+        id: String(loc.id),
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        timestamp: loc.created_at,
+      })));
     } catch (error) {
       // Use demo data if API fails
       setLocationHistory([
@@ -70,7 +76,12 @@ const Location = () => {
         // Save to backend
         if (token) {
           try {
-            await locationApi.saveLocation(newLocation.latitude, newLocation.longitude, token);
+            await locationApi.saveLocation(
+              newLocation.latitude,
+              newLocation.longitude,
+              position.coords.accuracy || 0,
+              token
+            );
             await fetchLocationHistory();
             toast({
               title: 'Location updated',
@@ -135,21 +146,14 @@ const Location = () => {
         </FadeIn>
 
         {/* Current Location Card */}
-        <FadeIn delay={0.1}>
-          <motion.div
-            className="glass-card p-6 relative overflow-hidden"
-            whileHover={{ scale: 1.01 }}
-          >
+        <FadeIn delay={0.05}>
+          <div className="glass-card p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 gradient-primary opacity-10 rounded-full blur-3xl" />
             
             <div className="flex items-center gap-4 mb-4">
-              <motion.div
-                className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
+              <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center">
                 <Navigation className="w-7 h-7 text-primary-foreground" />
-              </motion.div>
+              </div>
               <div>
                 <h3 className="font-semibold text-lg">Current Position</h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -185,39 +189,31 @@ const Location = () => {
                 </motion.button>
               </div>
             )}
-          </motion.div>
+          </div>
         </FadeIn>
 
-        {/* Map Placeholder */}
-        <FadeIn delay={0.15}>
-          <div className="glass-card overflow-hidden">
-            <div className="h-48 lg:h-64 bg-secondary relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground text-sm">Map View</p>
-                  <p className="text-xs text-muted-foreground mt-1">Google Maps integration</p>
-                </div>
-              </div>
-              {currentLocation && (
-                <motion.div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: 'spring' }}
-                >
-                  <div className="relative">
-                    <div className="w-6 h-6 rounded-full bg-primary shadow-glow" />
-                    <div className="absolute inset-0 w-6 h-6 rounded-full bg-primary animate-ping opacity-75" />
-                  </div>
-                </motion.div>
-              )}
-            </div>
+        {/* Google Map */}
+        <FadeIn delay={0.1}>
+          <div className="glass-card overflow-hidden p-0">
+            <GoogleMapWrapper
+              center={
+                currentLocation
+                  ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+                  : { lat: 40.7128, lng: -74.006 }
+              }
+              showCurrentLocation={!!currentLocation}
+              height="280px"
+              zoom={15}
+              markers={locationHistory.slice(0, 5).map((loc) => ({
+                position: { lat: loc.latitude, lng: loc.longitude },
+                type: 'history' as const,
+              }))}
+            />
           </div>
         </FadeIn>
 
         {/* Location History */}
-        <FadeIn delay={0.2}>
+        <FadeIn delay={0.15}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />

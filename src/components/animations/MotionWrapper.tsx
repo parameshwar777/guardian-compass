@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
 
 interface PageTransitionProps {
@@ -9,10 +9,10 @@ interface PageTransitionProps {
 export const PageTransition = ({ children, className = '' }: PageTransitionProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -29,9 +29,9 @@ interface FadeInProps {
 export const FadeIn = ({ children, delay = 0, className = '' }: FadeInProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -48,9 +48,9 @@ interface ScaleInProps {
 export const ScaleIn = ({ children, delay = 0, className = '' }: ScaleInProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
+      transition={{ duration: 0.3, delay, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -67,9 +67,9 @@ interface SlideUpProps {
 export const SlideUp = ({ children, delay = 0, className = '' }: SlideUpProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -83,7 +83,7 @@ interface StaggerContainerProps {
   staggerDelay?: number;
 }
 
-export const StaggerContainer = ({ children, className = '', staggerDelay = 0.1 }: StaggerContainerProps) => {
+export const StaggerContainer = ({ children, className = '', staggerDelay = 0.08 }: StaggerContainerProps) => {
   return (
     <motion.div
       initial="hidden"
@@ -108,10 +108,10 @@ export const StaggerItem = ({ children, className = '' }: { children: ReactNode;
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 },
+        hidden: { opacity: 0 },
+        visible: { opacity: 1 },
       }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -128,10 +128,10 @@ export const Pulse = ({ children, className = '' }: PulseProps) => {
   return (
     <motion.div
       animate={{
-        scale: [1, 1.05, 1],
+        scale: [1, 1.02, 1],
       }}
       transition={{
-        duration: 2,
+        duration: 2.5,
         repeat: Infinity,
         ease: 'easeInOut',
       }}
@@ -151,10 +151,33 @@ export const Float = ({ children, className = '' }: FloatProps) => {
   return (
     <motion.div
       animate={{
-        y: [0, -10, 0],
+        scale: [1, 1.05, 1],
       }}
       transition={{
         duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+interface GlowProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export const Glow = ({ children, className = '' }: GlowProps) => {
+  return (
+    <motion.div
+      animate={{
+        opacity: [0.5, 1, 0.5],
+      }}
+      transition={{
+        duration: 2,
         repeat: Infinity,
         ease: 'easeInOut',
       }}
