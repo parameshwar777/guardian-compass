@@ -17,7 +17,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { FadeIn, StaggerContainer, StaggerItem, Float } from '@/components/animations/MotionWrapper';
 import { useAuthStore, useLocationStore } from '@/store/useStore';
 import { useToast } from '@/hooks/use-toast';
-import GoogleMapWrapper from '@/components/maps/GoogleMap';
+import LeafletMap from '@/components/maps/LeafletMap';
 
 const featureCards = [
   {
@@ -125,15 +125,15 @@ const Dashboard = () => {
         {/* Map Section */}
         <FadeIn delay={0.05}>
           <div className="glass-card overflow-hidden p-0">
-            <GoogleMapWrapper
+            <LeafletMap
               center={
                 currentLocation
                   ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
-                  : { lat: 40.7128, lng: -74.006 }
+                  : { lat: 20.5937, lng: 78.9629 } // Default to India center
               }
               showCurrentLocation={!!currentLocation}
               height="200px"
-              zoom={14}
+              zoom={currentLocation ? 14 : 4}
             />
           </div>
         </FadeIn>
