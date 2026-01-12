@@ -6,7 +6,8 @@ import {
   Brain, 
   MessageSquare, 
   Hotel,
-  AlertTriangle 
+  AlertTriangle,
+  Phone
 } from 'lucide-react';
 
 const navItems = [
@@ -15,6 +16,7 @@ const navItems = [
   { path: '/predict', icon: Brain, label: 'Predict' },
   { path: '/assistant', icon: MessageSquare, label: 'AI Chat' },
   { path: '/stays', icon: Hotel, label: 'Stays' },
+  { path: '/emergency-contacts', icon: Phone, label: 'Contacts' },
 ];
 
 export const BottomNav = () => {

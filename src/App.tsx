@@ -13,6 +13,7 @@ import Predict from "./pages/Predict";
 import Assistant from "./pages/Assistant";
 import Stays from "./pages/Stays";
 import SOS from "./pages/SOS";
+import EmergencyContacts from "./pages/EmergencyContacts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="/assistant" element={<ProtectedRoute><Assistant /></ProtectedRoute>} />
               <Route path="/stays" element={<ProtectedRoute><Stays /></ProtectedRoute>} />
               <Route path="/sos" element={<ProtectedRoute><SOS /></ProtectedRoute>} />
+              <Route path="/emergency-contacts" element={<ProtectedRoute><EmergencyContacts /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { useLocationStore, useAuthStore } from '@/store/useStore';
 import { predictionApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import GoogleMapWrapper from '@/components/maps/GoogleMap';
+import LeafletMap from '@/components/maps/LeafletMap';
 
 const Predict = () => {
   const { currentLocation, predictedLocation, setPredictedLocation } = useLocationStore();
@@ -188,8 +188,8 @@ const Predict = () => {
                 </div>
               </div>
 
-              {/* Google Map */}
-              <GoogleMapWrapper
+              {/* Leaflet Map */}
+              <LeafletMap
                 center={
                   currentLocation
                     ? { lat: currentLocation.latitude, lng: currentLocation.longitude }

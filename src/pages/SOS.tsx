@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Phone, MessageSquare, MapPin, Check, Shield } from 'lucide-react';
+import { AlertTriangle, Phone, MessageSquare, MapPin, Check, Shield, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { FadeIn, Pulse } from '@/components/animations/MotionWrapper';
 import { LoadingSpinner } from '@/components/ui/loading';
@@ -18,10 +19,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+}
+
 const SOS = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
   const [sosTriggered, setSosTriggered] = useState(false);
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const [sosResult, setSosResult] = useState<{
     message: string;
     emergency_contacts: Array<{ name: string; phone: string }>;
@@ -30,6 +38,21 @@ const SOS = () => {
   const { currentLocation } = useLocationStore();
   const { token } = useAuthStore();
   const { toast } = useToast();
+
+  // Load emergency contacts on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('emergency-contacts');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setEmergencyContacts(parsed.filter((c: EmergencyContact) => c.phone.trim() !== ''));
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, []);
 
   const handleSOSTrigger = async () => {
     setShowConfirm(false);
@@ -47,25 +70,32 @@ const SOS = () => {
           const parsed = typeof response === 'string' ? JSON.parse(response) : response;
           setSosResult({
             message: parsed.message || 'Emergency SOS triggered successfully!',
-            emergency_contacts: parsed.emergency_contacts || [
-              { name: 'Emergency Services', phone: '911' },
-            ],
-            sms_content: parsed.sms_content || `Emergency alert sent from SafeTravel AI`,
+            emergency_contacts: parsed.emergency_contacts || emergencyContacts.map(c => ({ name: c.name || 'Contact', phone: c.phone })),
+            sms_content: parsed.sms_content || buildSmsContent(),
           });
         } catch {
-          setDemoResult();
+          setResultFromContacts();
         }
       } else {
         // Demo response
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setDemoResult();
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setResultFromContacts();
       }
 
       setSosTriggered(true);
-      toast({
-        title: 'SOS Triggered!',
-        description: 'Emergency contacts have been notified.',
-      });
+      
+      if (emergencyContacts.length > 0) {
+        toast({
+          title: 'SOS Triggered!',
+          description: `Alert sent to ${emergencyContacts.length} contact(s).`,
+        });
+      } else {
+        toast({
+          title: 'SOS Triggered!',
+          description: 'Please add emergency contacts for SMS alerts.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
       toast({
         title: 'SOS Failed',
@@ -77,15 +107,19 @@ const SOS = () => {
     }
   };
 
-  const setDemoResult = () => {
+  const buildSmsContent = () => {
+    return `🆘 EMERGENCY ALERT\n\nI need help! My current location:\nLat: ${currentLocation?.latitude.toFixed(6) || 'Unknown'}\nLong: ${currentLocation?.longitude.toFixed(6) || 'Unknown'}\n\nGoogle Maps: https://maps.google.com/?q=${currentLocation?.latitude || 0},${currentLocation?.longitude || 0}\n\nSent via SafeTravel AI`;
+  };
+
+  const setResultFromContacts = () => {
+    const contacts = emergencyContacts.length > 0
+      ? emergencyContacts.map((c) => ({ name: c.name || 'Contact', phone: c.phone }))
+      : [{ name: 'No contacts', phone: 'Add contacts in settings' }];
+
     setSosResult({
       message: 'Emergency SOS triggered successfully!',
-      emergency_contacts: [
-        { name: 'Emergency Services', phone: '911' },
-        { name: 'Mom', phone: '+1 234 567 8900' },
-        { name: 'Local Police', phone: '+1 234 567 8901' },
-      ],
-      sms_content: `🆘 EMERGENCY ALERT\n\nI need help! My current location:\nLat: ${currentLocation?.latitude.toFixed(6) || '40.7128'}\nLong: ${currentLocation?.longitude.toFixed(6) || '-74.0060'}\n\nSent via SafeTravel AI`,
+      emergency_contacts: contacts,
+      sms_content: buildSmsContent(),
     });
   };
 
@@ -96,7 +130,7 @@ const SOS = () => {
 
   return (
     <DashboardLayout>
-      <div className="px-4 lg:px-8 py-6 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <div className="px-4 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-180px)]">
         <AnimatePresence mode="wait">
           {sosTriggered && sosResult ? (
             <motion.div
@@ -240,13 +274,22 @@ const SOS = () => {
                 </div>
               </FadeIn>
 
-              {/* Location Status */}
+              {/* Location Status & Contacts Link */}
               <FadeIn delay={0.2}>
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <div className={`w-2 h-2 rounded-full ${currentLocation ? 'bg-success' : 'bg-warning'} animate-pulse`} />
-                  <span className="text-muted-foreground">
-                    {currentLocation ? 'Location ready' : 'Location not available'}
-                  </span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <div className={`w-2 h-2 rounded-full ${currentLocation ? 'bg-success' : 'bg-warning'} animate-pulse`} />
+                    <span className="text-muted-foreground">
+                      {currentLocation ? 'Location ready' : 'Location not available'}
+                    </span>
+                  </div>
+                  <Link
+                    to="/emergency-contacts"
+                    className="flex items-center justify-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Manage Emergency Contacts ({emergencyContacts.length})</span>
+                  </Link>
                 </div>
               </FadeIn>
             </motion.div>

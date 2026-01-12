@@ -7,7 +7,7 @@ import { LoadingSpinner, SkeletonList } from '@/components/ui/loading';
 import { useLocationStore, useAuthStore } from '@/store/useStore';
 import { locationApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import GoogleMapWrapper from '@/components/maps/GoogleMap';
+import LeafletMap from '@/components/maps/LeafletMap';
 
 interface LocationHistoryItem {
   id: number;
@@ -41,12 +41,8 @@ const Location = () => {
         timestamp: loc.created_at,
       })));
     } catch (error) {
-      // Use demo data if API fails
-      setLocationHistory([
-        { id: '1', latitude: 40.7128, longitude: -74.006, timestamp: new Date().toISOString(), address: 'New York, NY' },
-        { id: '2', latitude: 40.7614, longitude: -73.9776, timestamp: new Date(Date.now() - 3600000).toISOString(), address: 'Midtown Manhattan' },
-        { id: '3', latitude: 40.7484, longitude: -73.9857, timestamp: new Date(Date.now() - 7200000).toISOString(), address: 'Empire State Building' },
-      ]);
+      // Don't set demo data - let user enable location
+      console.log('Failed to fetch location history');
     } finally {
       setIsLoading(false);
     }
@@ -192,18 +188,18 @@ const Location = () => {
           </div>
         </FadeIn>
 
-        {/* Google Map */}
+        {/* Leaflet Map */}
         <FadeIn delay={0.1}>
           <div className="glass-card overflow-hidden p-0">
-            <GoogleMapWrapper
+            <LeafletMap
               center={
                 currentLocation
                   ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
-                  : { lat: 40.7128, lng: -74.006 }
+                  : { lat: 20.5937, lng: 78.9629 } // Default to India center
               }
               showCurrentLocation={!!currentLocation}
               height="280px"
-              zoom={15}
+              zoom={currentLocation ? 15 : 4}
               markers={locationHistory.slice(0, 5).map((loc) => ({
                 position: { lat: loc.latitude, lng: loc.longitude },
                 type: 'history' as const,
