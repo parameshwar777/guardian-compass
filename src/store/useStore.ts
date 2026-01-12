@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
-  name: string;
+  is_active: boolean;
 }
 
 interface Location {
@@ -20,6 +20,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   login: (user: User, token: string) => void;
+  loginWithToken: (token: string, email: string) => void;
   logout: () => void;
 }
 
@@ -44,6 +45,11 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       login: (user, token) => set({ user, token, isAuthenticated: true }),
+      loginWithToken: (token, email) => set({ 
+        user: { id: 0, email, is_active: true }, 
+        token, 
+        isAuthenticated: true 
+      }),
       logout: () => set({ user: null, token: null, isAuthenticated: false }),
     }),
     { name: 'auth-storage' }

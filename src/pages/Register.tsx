@@ -9,7 +9,6 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { useToast } from '@/hooks/use-toast';
 
 const Register = () => {
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,9 +19,8 @@ const Register = () => {
   const { toast } = useToast();
 
   const passwordStrength = {
-    hasMinLength: password.length >= 8,
+    hasMinLength: password.length >= 6,
     hasNumber: /\d/.test(password),
-    hasSpecial: /[!@#$%^&*]/.test(password),
   };
 
   const isPasswordValid = Object.values(passwordStrength).every(Boolean);
@@ -52,13 +50,13 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await authApi.register(email, password, name);
-      login(response.user, response.token);
+      const response = await authApi.register(email, password);
+      // After registration, redirect to login since API doesn't return a token
       toast({
         title: 'Account created!',
-        description: 'Welcome to SafeTravel AI.',
+        description: 'Please sign in with your new account.',
       });
-      navigate('/dashboard');
+      navigate('/login');
     } catch (error) {
       toast({
         title: 'Registration failed',
@@ -73,7 +71,7 @@ const Register = () => {
   // Demo register for testing
   const handleDemoRegister = () => {
     login(
-      { id: 'demo-user', email: 'demo@safetravel.ai', name: 'Demo User' },
+      { id: 0, email: 'demo@safetravel.ai', is_active: true },
       'demo-token-123'
     );
     navigate('/dashboard');
@@ -103,16 +101,16 @@ const Register = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name */}
+              {/* Email */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Full Name</label>
+                <label className="text-sm font-medium text-foreground">Email</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
                     className="input-field pl-12"
                     required
                   />
@@ -164,9 +162,8 @@ const Register = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="space-y-1 mt-2"
                   >
-                    <PasswordRequirement met={passwordStrength.hasMinLength} text="At least 8 characters" />
+                    <PasswordRequirement met={passwordStrength.hasMinLength} text="At least 6 characters" />
                     <PasswordRequirement met={passwordStrength.hasNumber} text="Contains a number" />
-                    <PasswordRequirement met={passwordStrength.hasSpecial} text="Contains special character (!@#$%^&*)" />
                   </motion.div>
                 )}
               </div>
