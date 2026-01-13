@@ -29,7 +29,7 @@ const Predict = () => {
     
     try {
       if (token) {
-        const response = await predictionApi.predictNextLocation(token);
+        const response = await predictionApi.predictNextLocation();
         // Parse the response string if it contains coordinates
         // Assuming response format could be JSON string or coordinate string
         try {

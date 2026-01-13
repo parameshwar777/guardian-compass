@@ -7,15 +7,22 @@ interface ApiOptions {
   params?: Record<string, string | number>;
 }
 
+function getAuthToken(): string | null {
+  return localStorage.getItem('token');
+}
+
 async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { method = 'GET', body, token, params } = options;
+  
+  // Use provided token or get from localStorage
+  const authToken = token || getAuthToken();
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
   }
 
   let url = `${API_BASE_URL}${endpoint}`;
@@ -42,7 +49,7 @@ async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T
   return response.json();
 }
 
-// Auth APIs
+// Auth APIs (no token required)
 export const authApi = {
   login: (email: string, password: string) =>
     apiCall<{ access_token: string; token_type: string }>('/api/v1/auth/login', {
@@ -57,93 +64,82 @@ export const authApi = {
     }),
 };
 
-// Location APIs
+// Location APIs (auto-uses token from localStorage)
 export const locationApi = {
-  saveLocation: (latitude: number, longitude: number, accuracy: number, token: string) =>
+  saveLocation: (latitude: number, longitude: number, accuracy: number) =>
     apiCall<{ id: number; latitude: number; longitude: number; accuracy: number; created_at: string }>(
       '/api/v1/locations/',
       {
         method: 'POST',
         body: { latitude, longitude, accuracy },
-        token,
       }
     ),
 
-  getHistory: (token: string, limit: number = 50) =>
+  getHistory: (limit: number = 50) =>
     apiCall<Array<{ id: number; latitude: number; longitude: number; accuracy: number; created_at: string }>>(
       '/api/v1/locations/history',
-      { token, params: { limit } }
+      { params: { limit } }
     ),
 };
 
 // Prediction API
 export const predictionApi = {
-  predictNextLocation: (token: string) =>
+  predictNextLocation: () =>
     apiCall<string>('/api/v1/prediction/next-location', {
       method: 'POST',
-      token,
     }),
 };
 
 // Assistant API
 export const assistantApi = {
-  chat: (question: string, token: string) =>
+  chat: (question: string) =>
     apiCall<string>('/api/v1/assistant/chat', {
       method: 'POST',
-      token,
       params: { question },
     }),
 };
 
 // Recommendations API
 export const recommendationsApi = {
-  getAccommodations: (token: string) =>
+  getAccommodations: () =>
     apiCall<string>('/api/v1/recommendations/accommodation', {
       method: 'POST',
-      token,
     }),
 };
 
 // SOS API
 export const sosApi = {
-  trigger: (latitude: number, longitude: number, token: string) =>
+  trigger: (latitude: number, longitude: number) =>
     apiCall<string>('/api/v1/sos/trigger', {
       method: 'POST',
       body: { latitude, longitude },
-      token,
     }),
 };
 
 // Federated Learning API
 export const federatedApi = {
-  trainLocal: (token: string) =>
+  trainLocal: () =>
     apiCall<string>('/api/v1/federated/train-local', {
       method: 'POST',
-      token,
     }),
 
-  aggregate: (token: string) =>
+  aggregate: () =>
     apiCall<string>('/api/v1/federated/aggregate', {
       method: 'POST',
-      token,
     }),
 };
 
 // Users API
 export const usersApi = {
-  updateEmergencyContacts: (
-    contacts: {
-      contact1?: string;
-      contact2?: string;
-      contact3?: string;
-      contact4?: string;
-      contact5?: string;
-    },
-    token: string
-  ) =>
+  updateEmergencyContacts: (contacts: {
+    contact1?: string;
+    contact2?: string;
+    contact3?: string;
+    contact4?: string;
+    contact5?: string;
+  }) =>
     apiCall<string>('/api/v1/users/emergency-contacts', {
       method: 'POST',
       body: contacts,
-      token,
     }),
 };

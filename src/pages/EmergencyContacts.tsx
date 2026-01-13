@@ -91,7 +91,7 @@ const EmergencyContacts = () => {
         validContacts.forEach((contact, index) => {
           contactsPayload[`contact${index + 1}`] = contact.phone;
         });
-        await usersApi.updateEmergencyContacts(contactsPayload, token);
+        await usersApi.updateEmergencyContacts(contactsPayload);
       }
 
       toast({

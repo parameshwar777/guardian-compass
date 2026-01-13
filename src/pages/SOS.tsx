@@ -62,8 +62,7 @@ const SOS = () => {
       if (token && currentLocation) {
         const response = await sosApi.trigger(
           currentLocation.latitude,
-          currentLocation.longitude,
-          token
+          currentLocation.longitude
         );
         // Parse string response
         try {
