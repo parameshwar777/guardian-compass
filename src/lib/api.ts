@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/store/useStore';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 interface ApiOptions {
@@ -8,7 +10,9 @@ interface ApiOptions {
 }
 
 function getAuthToken(): string | null {
-  return localStorage.getItem('token');
+  // Prefer the explicit token key (used by backend fetch pattern),
+  // but fall back to Zustand persisted state if it's missing.
+  return localStorage.getItem('token') || useAuthStore.getState().token;
 }
 
 async function apiCall<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
