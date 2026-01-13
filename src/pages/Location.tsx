@@ -33,7 +33,7 @@ const Location = () => {
     
     setIsLoading(true);
     try {
-      const response = await locationApi.getHistory(token, 50);
+      const response = await locationApi.getHistory(50);
       setLocationHistory(response.map((loc) => ({
         id: String(loc.id),
         latitude: loc.latitude,
@@ -75,8 +75,7 @@ const Location = () => {
             await locationApi.saveLocation(
               newLocation.latitude,
               newLocation.longitude,
-              position.coords.accuracy || 0,
-              token
+              position.coords.accuracy || 0
             );
             await fetchLocationHistory();
             toast({

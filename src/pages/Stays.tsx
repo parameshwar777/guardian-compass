@@ -45,7 +45,7 @@ const Stays = () => {
 
     try {
       if (token) {
-        const response = await recommendationsApi.getAccommodations(token);
+        const response = await recommendationsApi.getAccommodations();
         // Parse the string response if needed
         try {
           const parsed = typeof response === 'string' ? JSON.parse(response) : response;

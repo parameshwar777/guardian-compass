@@ -57,7 +57,7 @@ const Assistant = () => {
 
     try {
       if (token) {
-        const response = await assistantApi.chat(userMessage.content, token);
+        const response = await assistantApi.chat(userMessage.content);
         // Handle string response
         const responseText = typeof response === 'string' ? response : JSON.stringify(response);
         addAssistantMessage(responseText);

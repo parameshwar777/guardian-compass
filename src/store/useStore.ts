@@ -45,12 +45,10 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       login: (user, token) => {
-        // Also store in localStorage for API calls
         localStorage.setItem('token', token);
         set({ user, token, isAuthenticated: true });
       },
       loginWithToken: (token, email) => {
-        // Also store in localStorage for API calls
         localStorage.setItem('token', token);
         set({ 
           user: { id: 0, email, is_active: true }, 
